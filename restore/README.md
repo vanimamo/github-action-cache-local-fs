@@ -1,3 +1,31 @@
+# `khj809/github-action-cache-local-fs/restore` action
+
+It works as same as the original restore action along with additional input `cache-base-path` described [here](../README.md#usage).
+
+```yaml
+steps:
+  - uses: actions/checkout@v3
+
+  - uses: khj809/github-action-cache-local-fs/restore@v1
+    id: cache
+    with:
+      path: path/to/dependencies
+      key: ${{ runner.os }}-${{ hashFiles('**/lockfiles') }}
+      cache-base-path: /tmp/cache
+
+  - name: Install Dependencies
+    if: steps.cache.outputs.cache-hit != 'true'
+    run: /install.sh
+
+  - name: Build
+    run: /build.sh
+
+  - name: Publish package to public
+    run: /publish.sh
+```
+
+---
+
 # Restore action
 
 The restore action restores a cache. It works similarly to the `cache` action except that it doesn't have a post step to save the cache. This action provides granular ability to restore a cache without having to save it. It accepts the same set of inputs as the `cache` action.

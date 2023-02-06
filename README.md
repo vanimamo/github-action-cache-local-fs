@@ -1,3 +1,52 @@
+# github-action-cache-local-fs
+
+[![Tests](https://github.com/khj809/github-action-cache-local-fs/actions/workflows/workflow.yml/badge.svg)](https://github.com/khj809/github-action-cache-local-fs/actions/workflows/workflow.yml)
+
+This action allows caching dependencies and build outputs inside a local filesystem to improve workflow execution time in self-hosted runner environments, without limitations such as cache size limit or network overheads.
+
+## Usage
+
+Most of inputs and outputs are same as original cache action except the below input.
+* `cache-base-path` - An optional base local filesystem path where cached files are stored. Your cached files will be stored at `<cache-base-path>/<your-repository>/<cache-key>/cache.[tgz|tzst]`. Make sure this path is persisted during the lifetime of your self-hosted runners. Default: `/tmp/cache`
+
+### Example cache workflow
+```yaml
+name: Caching Primes
+
+on: push
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+    - uses: actions/checkout@v3
+
+    - name: Cache Primes
+      id: cache-primes
+      uses: khj809/github-action-cache-local-fs@v1
+      with:
+        path: prime-numbers
+        key: ${{ runner.os }}-primes
+        cache-base-path: /tmp/cache
+
+    - name: Generate Prime Numbers
+      if: steps.cache-primes.outputs.cache-hit != 'true'
+      run: /generate-primes.sh -d prime-numbers
+
+    - name: Use Prime Numbers
+      run: /primes.sh -d prime-numbers
+```
+
+## Cache Management
+
+Since this action relies on your own storages, it's your responsibility to manage your storages by applying appropriate caching strategies. For example, you may run this crontab to remove old cache files more than one week on a daily basis.
+```bash
+0 0 * * * find <your-cache-base-path> -type f -mtime +7 -execdir rm -rf -- '{}' \;
+```
+
+---
+
 # Cache action
 
 This action allows caching dependencies and build outputs to improve workflow execution time.

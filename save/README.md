@@ -1,3 +1,28 @@
+# `khj809/github-action-cache-local-fs/save` action
+
+It works as same as the original save action along with additional input `cache-base-path` described [here](../README.md#usage).
+
+Note that this action does not have `upload-chunk-size` input where the original action does have.
+
+```yaml
+steps:
+  - uses: actions/checkout@v3
+
+  - name: Install Dependencies
+    run: /install.sh
+
+  - name: Build artifacts
+    run: /build.sh
+
+  - uses: khj809/github-action-cache-local-fs/save@v1
+    id: cache
+    with:
+      path: path/to/dependencies
+      key: ${{ runner.os }}-${{ hashFiles('**/lockfiles') }}
+```
+
+---
+
 # Save action
 
 The save action saves a cache. It works similarly to the `cache` action except that it doesn't first do a restore. This action provides granular ability to save a cache without having to restore it, or to do a save at any stage of the workflow job -- not only in post phase.
