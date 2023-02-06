@@ -1,5 +1,5 @@
 name: 'github-action-cache-local-fs'
-description: 'Cache artifacts like dependencies and build outputs inside a local filesystem to improve workflow execution time in self-hosted runner environments'
+description: 'Cache artifacts like dependencies and build outputs inside a local filesystem in self-hosted runner environments'
 author: 'khj809'
 inputs:
   path:
