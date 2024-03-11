@@ -4,6 +4,7 @@ import * as path from "path";
 
 import * as utils from "./internal/cacheUtils";
 import { createTar, extractTar, listTar } from "./internal/tar";
+import { statSync } from "node:fs";
 
 const { stat } = fs.promises;
 
@@ -97,11 +98,15 @@ export async function restoreCache(
                 utils.getCacheStorePath(cacheBasePath, key),
                 fileName
             );
-            const stats = await stat(cacheFilePath);
-            if (stats.isFile()) {
-                matchedKey = key;
-                archivePath = cacheFilePath;
-                break;
+            try {
+                const stats = statSync(cacheFilePath);
+                if (stats.isFile()) {
+                    matchedKey = key;
+                    archivePath = cacheFilePath;
+                    break;
+                }
+            } catch (error) {
+                core.debug(`Cache not found for key: ${key}`);
             }
         }
         if (matchedKey === "") {
@@ -116,11 +121,15 @@ export async function restoreCache(
                             utils.getCacheStorePath(cacheBasePath, folder),
                             fileName
                         );
-                        const stats = await stat(cacheFilePath);
-                        if (stats.isFile()) {
-                            matchedKey = folder;
-                            archivePath = cacheFilePath;
-                            break;
+                        try {
+                            const stats = statSync(cacheFilePath);
+                            if (stats.isFile()) {
+                                matchedKey = key;
+                                archivePath = cacheFilePath;
+                                break;
+                            }
+                        } catch (error) {
+                            core.debug(`Cache not found for key: ${key}`);
                         }
                     }
                 }
