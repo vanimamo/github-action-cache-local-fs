@@ -91,16 +91,34 @@ export async function restoreCache(
     let archivePath = "";
     try {
         let matchedKey = "";
+        const fileName = utils.getCacheFileName(compressionMethod);
         for (const key of keys) {
             const cacheFilePath = path.join(
                 utils.getCacheStorePath(cacheBasePath, key),
-                utils.getCacheFileName(compressionMethod)
+                fileName
             );
             const stats = await stat(cacheFilePath);
             if (stats.isFile()) {
                 matchedKey = key;
                 archivePath = cacheFilePath;
                 break;
+            }
+
+            for (const folder of fs.readdirSync(
+                utils.getCacheStorePath(cacheBasePath, "")
+            )) {
+                if (folder.startsWith(key)) {
+                    const cacheFilePath = path.join(
+                        utils.getCacheStorePath(cacheBasePath, folder),
+                        fileName
+                    );
+                    const stats = await stat(cacheFilePath);
+                    if (stats.isFile()) {
+                        matchedKey = folder;
+                        archivePath = cacheFilePath;
+                        break;
+                    }
+                }
             }
         }
         if (matchedKey === "") {
