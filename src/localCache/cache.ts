@@ -103,27 +103,31 @@ export async function restoreCache(
                 archivePath = cacheFilePath;
                 break;
             }
-
+        }
+        if (matchedKey === "") {
             for (const folder of fs.readdirSync(
                 utils.getCacheStorePath(cacheBasePath, "")
             )) {
-                if (folder.startsWith(key)) {
-                    const cacheFilePath = path.join(
-                        utils.getCacheStorePath(cacheBasePath, folder),
-                        fileName
-                    );
-                    const stats = await stat(cacheFilePath);
-                    if (stats.isFile()) {
-                        matchedKey = folder;
-                        archivePath = cacheFilePath;
-                        break;
+                core.debug(`Checking folder: ${folder}`);
+                for (const key of restoreKeys) {
+                    if (folder.startsWith(key)) {
+                        core.debug(`Matched Key: ${key}`);
+                        const cacheFilePath = path.join(
+                            utils.getCacheStorePath(cacheBasePath, folder),
+                            fileName
+                        );
+                        const stats = await stat(cacheFilePath);
+                        if (stats.isFile()) {
+                            matchedKey = folder;
+                            archivePath = cacheFilePath;
+                            break;
+                        }
                     }
                 }
             }
-        }
-        if (matchedKey === "") {
-            // Cache not found
-            return undefined;
+            if (matchedKey === "") {
+                return undefined;
+            }
         }
 
         core.debug(`Archive Path: ${archivePath}`);
